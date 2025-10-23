@@ -4,6 +4,7 @@
 
 #include "ax25.h"
 
+/*
   // Calls constructor GenericSPIClass encapsulates the standard Arduino hardware and other
   // hardware SPI interfaces. Defaults to Frequency1MHz, BitOrderMSBFirst, DataMode0.
   // Calls RH_RF22 constructor with defaults of SS pin and pin 2 for interrupt
@@ -11,7 +12,13 @@ AX25::AX25(uint8_t slaveSelectPin, uint8_t interruptPin, uint8_t _shutdownPin)
  : spi(RHHardwareSPI()), radio(RH_RF22(slaveSelectPin, interruptPin, spi)) {
   shutdownPin = _shutdownPin;
 }
+*/
 
+AX25::AX25(){
+
+}
+
+/*
 // Power cycles the radio, then initalizes the radio
 bool AX25::powerAndInit() {
   // Need a delay before turning on radio
@@ -30,8 +37,9 @@ bool AX25::powerAndInit() {
   }
 
 }
+*/
 
-
+/*
 // Formats and transmit messages and then puts radio to sleep
 void AX25::transmit(char* message1, uint16_t size) {
   Index = 0;
@@ -48,11 +56,15 @@ void AX25::transmit(char* message1, uint16_t size) {
   radio.waitPacketSent();
   radio.sleep();
 }
+*/
 
+/*
 bool AX25::available() {
   return radio.available();
 }
+*/
 
+/*
 void AX25::setRxMode() {
   // radio.sleep();
   radio.setModeRx();
@@ -63,11 +75,15 @@ void AX25::setRxMode() {
   radio.setFrequency(437.505);  //TODO: FIX
   radio.setModemRegisters(&FSK1k2);
 }
+*/
 
+/*
 void AX25::setTxMode() {
   radio.setModeTx();
 }
+*/
 
+/*
 void AX25::sendPacket() {
   radio.setModeIdle();
   radio.setFrequency(437.505);  //TODO: FIX
@@ -76,11 +92,14 @@ void AX25::sendPacket() {
   // radio.setTxPower(0x02); //TODO FIX
   radio.send(finalSequence, Index);  
 }
+*/
 
+/*
 bool AX25::receive(uint8_t* buf, uint8_t* len) {
   *len = MAX_LENGTH_FINAL;
   return radio.recv(buf, len);
 }
+*/
 
 void AX25::setSSIDsource(byte ssid_src) { ssid_source = ssid_src;}
 void AX25::setSSIDdest(byte ssid_dest) { ssid_destination = ssid_dest;}
@@ -112,13 +131,13 @@ void AX25::addHeader(byte *Buffer) {
     Buffer[Index++] = AX25_PROTOCOL;
 }
 
-void AX25::formatPacket(uint16_t size) {
+int AX25::formatPacket(uint16_t size, byte *sendMessage) {
   
   // Add Header
   addHeader(bitSequence);
 
   //Add Message
-  for (int i=0; i < size ; i++) bitSequence[Index++] = message[i];
+  for (int i=0; i < size ; i++) bitSequence[Index++] = sendMessage[i];
 
   //Convert bit sequence from MSB to LSB
   for (int i=0; i < Index ; i++) bitSequence[i] = MSB_LSB_swap_8bit(bitSequence[i]);
@@ -145,6 +164,7 @@ void AX25::formatPacket(uint16_t size) {
   // for (int i=0; i< MAX_LENGTH_FINAL ;i++) Serial.println(finalSequence[i]);
   // Serial.println("");
   
+  return Index;
 }
 
 
@@ -472,11 +492,11 @@ char* AX25::demod(byte *Buffer, uint8_t bytelength) {
     //   Serial.print(Message[i]);
     // }
     // Serial.println("");
-    return Message;
+    return Message; // FIXME : 何でこれだけこの設計...??
     
 }
 
-boolean AX25::logicXOR(boolean a, boolean b) {
+inline bool AX25::logicXOR(bool a, bool b) {
   return (a||b) && !(a && b); 
 }
 
@@ -523,7 +543,6 @@ uint16_t AX25::crcCcitt (byte *Buffer, uint8_t bytelength) {
 }
 
 // FIXME : 定数に対し、関数によって計算を行うのは勿体無いので、マクロとして宣言する（e.g. MSB_LSB_swap_16bit(CRC_POLYGEN)）
-// FIXME : LOGICXOR()関数は不要 (e.g. LOGICXOR(a, b) -> a ^ b)
 
 byte AX25::MSB_LSB_swap_8bit(byte v) {
 // 8bitデータの並び順を反転
@@ -578,3 +597,13 @@ void AX25::setCallsignAndSsid() {
 
 // FIXME : boolean -> bool
 // FIXME : unsigned int -> uint16_t
+
+void AX25::init(){
+    arrayInit();
+    setCallsignAndSsid();
+}
+
+byte AX25::getPacketByte(int num){
+  if(num < Index) return finalSequence[num];
+  else return 0;
+}

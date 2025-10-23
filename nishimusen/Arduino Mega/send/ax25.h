@@ -1,9 +1,6 @@
-#ifndef AX25_h
-#define AX25_h
+#pragma once
 
 #include <SPI.h>
-#include "RH_RF22.h"
-#include <RHGenericDriver.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,6 +23,7 @@
 
 // Add by myself
 #define MAX_MESSAGE_SIZE 256
+#define AX25_FLAG_NUM 64
 
 // Call sign
 #define FROM_CALL_SIGN "J0TEST"
@@ -35,27 +33,30 @@ class AX25 {
 public:
 	//Default Constructor
 	// AX25(char* fromCallsign, char* toCallsign);
-	AX25(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t _shutdownPin = 9);
+	// AX25(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, uint8_t _shutdownPin = 9);
+  AX25();
+  
+	// RH_RF22 radio;
 
-	RH_RF22 radio;
+	// bool powerAndInit();
 
-	bool powerAndInit();
+	// void transmit(char* payload, uint16_t size); // void transmit(char* payload, unsigned int len)
 
-	void transmit(char* payload, uint16_t size); // void transmit(char* payload, unsigned int len)
+	// bool available();
 
-	bool available();
+	// void setRxMode();
 
-	void setRxMode();
+	// void setTxMode();
 
-	void setTxMode();
-
-	bool receive(uint8_t* buf, uint8_t* len);
+	// bool receive(uint8_t* buf, uint8_t* len);
 
 	char* demod(byte *Buffer, uint8_t bytelength);
 
-	uint8_t shutdownPin;
+	byte getPacketByte(int num);
 
-	
+	void init();
+
+	int formatPacket(uint16_t size, byte *sendMessage);
 
 	// TODO: figure out
 	// inline void setFrequency(float freq);
@@ -63,7 +64,7 @@ public:
 	// inline void setPower(byte pwr);
 
 private:
-
+/*
 	RH_RF22::ModemConfig FSK1k2 = {
 	    0x2B, //reg_1c
 	    0x03, //reg_1f
@@ -88,6 +89,7 @@ private:
 	
 
 	RHHardwareSPI spi;
+*/
 
 	char SrcCallsign[7];
 	char DestCallsign[7];
@@ -100,7 +102,7 @@ private:
 	char message[MAX_MESSAGE_SIZE];
 
 	int Index = 0;
-	unsigned int FCS = 0;
+	uint16_t FCS = 0;
 
 	void radioSetup();
 
@@ -115,7 +117,7 @@ private:
 
 	
 
-	boolean logicXOR(boolean a, boolean b);
+	inline bool logicXOR(bool a, bool b);
 
 	//Calculate the 2-byte CRC on the data
 	// void crcCcitt(char* crc, char* data, unsigned int len);
@@ -133,11 +135,5 @@ private:
 
 	//Perform bit stuffing on the input array (add an extra 0 after 5 sequential 1's)
 	// unsigned int bitStuff(char* out, char* in, unsigned int inLen);
-	void formatPacket(uint16_t size);
-
-	void sendPacket();	
-
 
 };
-
-#endif //AX25_h
