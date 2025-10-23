@@ -1,5 +1,3 @@
-// 現在は /nishimusen/Arduino Mega/send/ 内が最新
-
 #ifndef AX25_h
 #define AX25_h
 
@@ -25,6 +23,13 @@
 
 #define MAX_LENGTH 				280
 #define MAX_LENGTH_FINAL 		450
+
+// Add by myself
+#define MAX_MESSAGE_SIZE 256
+
+// Call sign
+#define FROM_CALL_SIGN "J0TEST"
+#define TO_CALL_SIGN "J0DEMO"
 
 class AX25 {
 public:
@@ -92,7 +97,7 @@ private:
 
 	byte bitSequence[MAX_LENGTH*8];
 	byte finalSequence[MAX_LENGTH_FINAL];
-	char message[256];
+	char message[MAX_MESSAGE_SIZE];
 
 	int Index = 0;
 	unsigned int FCS = 0;

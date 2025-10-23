@@ -1,4 +1,6 @@
-// 現在は /nishimusen/Arduino Mega/send/ 内が最新
+// このファイルは書き換えを行わない
+// 書き換えを行う場合は、yui-projectに結用AX.25ライブラリのリポジトリを作成し、変更
+// コメントの最終更新 : 10/23 10:15
 
 #include "ax25.h"
 
@@ -563,12 +565,13 @@ uint16_t AX25::MSB_LSB_swap_16bit(uint16_t v) {
 void AX25::arrayInit() {
   for (int i=0; i< MAX_LENGTH * 8 ;i++) bitSequence[i] = 0;
   for (int i=0; i< MAX_LENGTH_FINAL ;i++) finalSequence[i] = 0;
-  for (int j=0; j< 256 ;j++) strcpy(message," ");
+  // for (int j=0; j< 256 ;j++) strcpy(message," "); // MEMO : 初期化の方法がよくないのでコメントアウト
+  memset(message, 0, MAX_MESSAGE_SIZE);
 }
 
 void AX25::setCallsignAndSsid() {
-  setFromCallsign("KD2BHC"); //TODO replace
-  setToCallsign("CQ    ");
+  setFromCallsign(FROM_CALL_SIGN);
+  setToCallsign(TO_CALL_SIGN);
   setSSIDdest(AX25_SSID_DESTINATION);
   setSSIDsource(AX25_SSID_SOURCE);
 }
