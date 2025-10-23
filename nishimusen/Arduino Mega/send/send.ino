@@ -32,6 +32,8 @@ void setup() {
     pinMode(SCK,  INPUT);
     pinMode(SS,   INPUT_PULLUP);
 
+    finalNum = AX25.formatPacket(strlen(sendMessage), sendMessage);
+
     // TIMSK0 = 0; // タイマ割り込みを無効化
 
     // SPI スレーブ有効化（MODE0: CPOL=0, CPHA=0）
@@ -45,11 +47,13 @@ void setup() {
 }
 
 // NOTE : sei()：割り込み許可／cli():割り込み禁止
+// SPCR |= _BV(SPIE); : SPI割り込み許可
+// SPCR &= ~_BV(SPIE); : SPI割り込み禁止
 
 // 1バイト(8クロック)完了のたびに呼ばれる
 ISR(SPI_STC_vect) {
     if(sendCount < finalNum){
-        SPDR = AX25.getPacketByte(sendCount);
+        SPDR = AX25.getPacketByte(sendCount++);
     }else{
         isTxDone = true;
     }
@@ -85,16 +89,10 @@ void loop() {
             cli();
             break;
         }
-        delay(1);
+        //delay(1);
     }
 
-    while (1) { // シリアルに入力が来るまで待機
-        if (Serial.available() > 0) {
-            Serial.read();
-            break;
-        }
-        delay(1);
-    }
+    // delay(2000);
 
     isTxDone = false;
     sendCount = 0;
