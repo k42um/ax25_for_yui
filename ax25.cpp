@@ -1,3 +1,7 @@
+// このファイルは書き換えを行わない
+// 書き換えを行う場合は、yui-projectに結用AX.25ライブラリのリポジトリを作成し、変更
+// コメントの最終更新 : 10/23 10:15
+
 #include "ax25.h"
 
   // Calls constructor GenericSPIClass encapsulates the standard Arduino hardware and other
@@ -87,6 +91,8 @@ void AX25::setToCallsign(char *tocallsign){strcpy(DestCallsign,tocallsign);}
 // void setPower(byte pwr) {radio.setTxPower(pwr);}
 
 void AX25::addHeader(byte *Buffer) {
+// ヘッダ部分（アドレスや制御、PID）を構成
+
     //Shift bits 1 place to the left in order to allow for HDLC extension bit
     for (int i=0; i < strlen(DestCallsign) ; i++) Buffer[Index++] = DestCallsign[i]<<1;
 
@@ -144,6 +150,7 @@ void AX25::formatPacket(uint16_t size) {
 
 
 void AX25::bitProcessing(byte *Buffer, uint8_t bytelength) {
+// 入力のバイト列 → ビット化 → ビットスタッフ → フラグ(0x7E)の挿入 → NRZI 変調 → 8bit境界までパディング → バイトへ再パック
   
     byte BitSequence[bytelength*8+1];
     byte BitSequenceStuffed[bytelength*8+bytelength*8/5+1];
@@ -183,7 +190,7 @@ void AX25::bitProcessing(byte *Buffer, uint8_t bytelength) {
       
       _size = 0;
        //Recreate 0b01111110 (FLAG) in byte size
-      for (int i=0; i < 64 ; i++)
+      for (int i=0; i < 64 ; i++) // FIXME : フラグは64個もいらない...？
       { 
          Buffer[_size++] = 0x00;
          for (int j=0; j < 6 ; j++) 
@@ -244,7 +251,8 @@ void AX25::bitProcessing(byte *Buffer, uint8_t bytelength) {
 }
 
 char* AX25::demod(byte *Buffer, uint8_t bytelength) {
-  
+// おそらく、bitProcessing()関数と逆のことをしている？  
+
     byte BitSequence[bytelength*8];
     byte ByteSequence[bytelength];
     byte BitSequence_temp[bytelength*8];
@@ -514,7 +522,12 @@ uint16_t AX25::crcCcitt (byte *Buffer, uint8_t bytelength) {
   return  MSB_LSB_swap_16bit(~SR);  
 }
 
+// FIXME : 定数に対し、関数によって計算を行うのは勿体無いので、マクロとして宣言する（e.g. MSB_LSB_swap_16bit(CRC_POLYGEN)）
+// FIXME : LOGICXOR()関数は不要 (e.g. LOGICXOR(a, b) -> a ^ b)
+
 byte AX25::MSB_LSB_swap_8bit(byte v) {
+// 8bitデータの並び順を反転
+
   // swap odd and even bits
   v = ((v >> 1) & 0x55) | ((v & 0x55) << 1);
   // swap consecutive pairs
@@ -537,6 +550,7 @@ byte AX25::MSB_LSB_swap_8bit(byte v) {
 // }
 
 uint16_t AX25::MSB_LSB_swap_16bit(uint16_t v) {
+// 16bitデータの並び順を反転
   // swap odd and even bits
   v = ((v >> 1) & 0x5555) | ((v & 0x5555) << 1);
   // swap consecutive pairs
@@ -561,6 +575,5 @@ void AX25::setCallsignAndSsid() {
   setSSIDsource(AX25_SSID_SOURCE);
 }
 
-
-
-
+// FIXME : boolean -> bool
+// FIXME : unsigned int -> uint16_t
